@@ -24,5 +24,15 @@ spring:
       acks: 1
       properties:
         spring.json.add.type.headers: true
+    consumer:
+      group-id: inventory-reserved-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        properties:
+        spring.json.trusted.packages: "com.krishna9787.inventory_service.dto"
+        spring.json.type.mapping: "com.krishna9787.inventory_service.dto.InventoryReservedEventDto:com.krishna9787.order_service.dto.InventoryReservedDto"
+
 server:
   port: 8081

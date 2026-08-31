@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import com.krishna9787.order_service.dto.InventoryReservedDto;
 import com.krishna9787.order_service.dto.OrdersDto;
 import com.krishna9787.order_service.entity.Orders;
 import com.krishna9787.order_service.exception.OrderNotFoundException;
@@ -51,5 +52,14 @@ public class OrderServiceImpl implements OrderService {
                     System.out.println("Partition: " + result.getRecordMetadata().partition());
                     System.out.println("Offset: " + result.getRecordMetadata().offset());
                 });
+    }
+
+    @Override
+    public void handleReservedINventory(InventoryReservedDto inventoryReservedDto) {
+        Orders order = orderRepository.findByOrderId(inventoryReservedDto.getOrderId())
+                .orElseThrow(() -> new OrderNotFoundException("order not found"));
+
+        order.setEventType(inventoryReservedDto.getStatus());
+        orderRepository.save(order);
     }
 }

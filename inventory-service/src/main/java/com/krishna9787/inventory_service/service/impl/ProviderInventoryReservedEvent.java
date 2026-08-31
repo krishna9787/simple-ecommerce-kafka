@@ -26,6 +26,7 @@ public class ProviderInventoryReservedEvent {
                     if (exception != null) {
                         throw new KafkaEventFailedException("Kafka Event Inventory Failed has issues");
                     }
+                    System.out.println("Inventory Reserved. Event sent");
                 });
     }
 }

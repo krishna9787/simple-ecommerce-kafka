@@ -1,244 +1,171 @@
 # Simple E-Commerce Kafka Microservices
 
-A microservices-based e-commerce application built with Java, Spring Boot, and Apache Kafka for asynchronous communication between services.
+This repository contains a Spring Boot-based microservices sample for an e-commerce workflow, with asynchronous communication handled through Kafka.
 
-## Project Overview
+## Current Project State
 
-This project demonstrates a modern microservices architecture for an e-commerce platform with event-driven communication. The system is composed of three independent microservices that communicate through Kafka topics.
+The codebase currently contains the following services:
 
-## Architecture
+1. Inventory Service
+   - Path: `inventory-service/`
+   - Uses H2 in-memory database and Kafka producer/consumer configuration
+   - Consumes `order-created` messages
+   - Reserves stock and emits `inventory-reserved` or `inventory-failed`
 
-### Microservices
+2. Order Service
+   - Path: `order-service/`
+   - Uses H2 in-memory database and Kafka producer/consumer configuration
+   - Exposes a REST endpoint for creating orders
+   - Publishes `order-created` events when an order is created
+   - Consumes `inventory-reserved` messages to update order state
 
-1. **Inventory Service** - Manages product inventory and stock levels
-   - Location: `inventory-service/`
-   - Handles inventory updates and stock queries
-   - Publishes inventory events to Kafka
-
-2. **Order Service** - Processes customer orders
-   - Location: `order-service/`
-   - Manages order creation and status tracking
-   - Consumes inventory and payment events
-   - Publishes order events to Kafka
-
-3. **Payment Service** - Handles payment processing
-   - Location: `payment-service/`
-   - Processes payments for orders
-   - Publishes payment status events
-   - Integrates with payment providers
+3. Payment Service
+   - Path: `payment-service/`
+   - Scaffolded Spring Boot project, but it is not yet fully implemented in the current codebase
+   - No business logic or event consumers are configured yet
 
 ## Technology Stack
 
-- **Java** - Core programming language
-- **Spring Boot** - Framework for microservices
-- **Apache Kafka** - Event streaming and asynchronous messaging
-- **Maven** - Build and dependency management
-- **JPA/Hibernate** - Object-relational mapping
-- **H2/MySQL** - Database (varies by service configuration)
+- Java 17
+- Spring Boot 4.1.0
+- Apache Kafka
+- Spring Data JPA
+- H2 Database
+- Maven
 
-## Prerequisites
+## Service Ports and Configuration
 
-- Java Development Kit (JDK) 11 or higher
-- Apache Maven 3.6 or higher
-- Apache Kafka 2.8 or higher
-- Docker (optional, for containerized setup)
+The services are currently configured with the following ports:
 
-## Installation
+- `order-service`: `http://localhost:8081`
+- `inventory-service`: `http://localhost:8082`
+- `payment-service`: uses the default Spring Boot port unless configured in its `application.yaml`
 
-### 1. Clone the Repository
+The in-memory H2 database consoles are available at:
 
-```bash
-cd simple-ecommerce-kafka
-```
+- `http://localhost:8081/h2-console`
+- `http://localhost:8082/h2-console`
 
-### 2. Build All Services
+## Kafka Event Flow
 
-```bash
-# Build the entire project
-mvn clean install
+The current event-driven flow implemented in the application is:
 
-# Or build individual services
-cd inventory-service && mvn clean install
-cd ../order-service && mvn clean install
-cd ../payment-service && mvn clean install
-```
-
-### 3. Configure Kafka
-
-Ensure Kafka is running on your local machine or update the `application.yaml` in each service to point to your Kafka broker:
-
-```yaml
-spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-```
-
-## Running the Services
-
-### Option 1: From Command Line
-
-Each service can be started independently:
-
-```bash
-# Terminal 1: Start Inventory Service
-cd inventory-service
-mvn spring-boot:run
-
-# Terminal 2: Start Order Service
-cd order-service
-mvn spring-boot:run
-
-# Terminal 3: Start Payment Service
-cd payment-service
-mvn spring-boot:run
-```
-
-### Option 2: Using Maven Wrapper
-
-```bash
-# Inventory Service
-cd inventory-service
-./mvnw spring-boot:run
-
-# Order Service
-cd order-service
-./mvnw spring-boot:run
-
-# Payment Service
-cd payment-service
-./mvnw spring-boot:run
-```
-
-### Option 3: Docker Compose (if applicable)
-
-```bash
-docker-compose up
-```
+1. `order-service` creates an order through REST
+2. `order-service` publishes message to Kafka topic `order-created`
+3. `inventory-service` listens to `order-created`
+4. `inventory-service` validates stock and publishes either:
+   - `inventory-reserved`
+   - `inventory-failed`
+5. `order-service` listens to `inventory-reserved` and updates the order status
 
 ## API Endpoints
 
-Each service exposes REST APIs for interaction. Refer to the individual service documentation or Swagger UI (if enabled) for detailed endpoint specifications.
+### Order Service
+
+Base URL: `http://localhost:8081`
+
+- `POST /api/order`
+  - Creates a new order
+  - Example request body:
+
+```json
+{
+  "orderId": "ORD-1001",
+  "customerId": "CUST-1",
+  "productId": "PROD-1",
+  "quantity": 2,
+  "status": "PENDING"
+}
+```
 
 ### Inventory Service
 
-- Base URL: `http://localhost:8081`
-- Endpoints: Product inventory management
+Base URL: `http://localhost:8082`
 
-### Order Service
+- `POST /api/inventory/add`
+  - Adds inventory for a product
+  - Example request body:
 
-- Base URL: `http://localhost:8082`
-- Endpoints: Order management
+```json
+{
+  "productId": "PROD-1",
+  "quantity": 25,
+  "price": 199.99
+}
+```
 
-### Payment Service
+## Kafka Topics in Use
 
-- Base URL: `http://localhost:8083`
-- Endpoints: Payment processing
+The following topics are currently wired in the code:
+
+- `order-created`
+- `inventory-reserved`
+- `inventory-failed`
 
 ## Project Structure
 
-```
+```text
 simple-ecommerce-kafka/
-├── inventory-service/       # Inventory management microservice
+├── inventory-service/
 │   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   └── resources/
-│   │   └── test/
 │   ├── pom.xml
+│   ├── mvnw
 │   └── HELP.md
-├── order-service/           # Order processing microservice
+├── order-service/
 │   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   └── resources/
-│   │   └── test/
 │   ├── pom.xml
+│   ├── mvnw
 │   └── HELP.md
-├── payment-service/         # Payment processing microservice
+├── payment-service/
 │   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/
-│   │   │   └── resources/
-│   │   └── test/
 │   ├── pom.xml
+│   ├── mvnw
 │   └── HELP.md
-└── README.md                # This file
+├── README.md
+└── .gitignore
 ```
 
-## Kafka Topics
+## Prerequisites
 
-The services communicate through the following Kafka topics (as configured):
+- JDK 17+
+- Maven 3.6+
+- Apache Kafka running locally on `localhost:9092`
 
-- `inventory-events` - Inventory updates
-- `order-events` - Order status changes
-- `payment-events` - Payment processing events
+## Running the Services
 
-## Configuration
-
-Each microservice has its own `application.yaml` configuration file located in `src/main/resources/`. Key configurations include:
-
-- Server port
-- Kafka broker addresses
-- Database connection details
-- Logging levels
-
-## Development
-
-### Adding a New Feature
-
-1. Create a feature branch: `git checkout -b feature/your-feature-name`
-2. Make your changes
-3. Run tests: `mvn test`
-4. Commit your changes
-5. Push to the branch and create a pull request
-
-### Running Tests
+From the project root, run each service individually:
 
 ```bash
-# Run tests for all services
-mvn test
-
-# Run tests for a specific service
-cd inventory-service && mvn test
+cd inventory-service
+./mvnw spring-boot:run
 ```
 
-## Troubleshooting
+```bash
+cd order-service
+./mvnw spring-boot:run
+```
 
-### Kafka Connection Issues
+```bash
+cd payment-service
+./mvnw spring-boot:run
+```
 
-- Ensure Kafka is running and accessible
-- Verify `bootstrap-servers` configuration in `application.yaml`
-- Check Kafka logs for errors
+## Building and Testing
 
-### Port Conflicts
+```bash
+cd inventory-service && ./mvnw test
+cd order-service && ./mvnw test
+cd payment-service && ./mvnw test
+```
 
-- Services run on ports 8081, 8082, and 8083 by default
-- Modify `server.port` in `application.yaml` if ports are already in use
+## Notes
 
-### Build Failures
+- This project is currently focused on inventory validation for order processing and demonstrates a real Kafka-based event-driven workflow.
+- The payment service is a placeholder and will need additional implementation for payment processing and payment event integration.
+- Some configuration values, such as the Kafka broker and service ports, can be updated in each service's `application.yaml` file.
 
-- Clean and rebuild: `mvn clean install`
-- Update Maven: `mvn --version`
-- Check Java version: `java -version`
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Write or update tests
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see LICENSE file for details.
-
-## Support
-
-For issues, questions, or suggestions, please open an issue on the project repository.
-
-## Additional Resources
+## Useful References
 
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Spring Cloud Stream Documentation](https://spring.io/projects/spring-cloud-stream)
+- [Spring for Apache Kafka](https://spring.io/projects/spring-kafka)
