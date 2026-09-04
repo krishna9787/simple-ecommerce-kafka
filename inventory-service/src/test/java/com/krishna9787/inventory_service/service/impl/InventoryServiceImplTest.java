@@ -20,8 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.krishna9787.inventory_service.dto.InventoryDto;
-import com.krishna9787.inventory_service.dto.InventoryFailedEventDto;
-import com.krishna9787.inventory_service.dto.InventoryReservedEventDto;
+import com.krishna9787.inventory_service.dto.InventoryStatusEventDto;
 import com.krishna9787.inventory_service.dto.OrderCreatedEventDto;
 import com.krishna9787.inventory_service.entity.Inventory;
 import com.krishna9787.inventory_service.exception.InventoryNotFoundException;
@@ -70,8 +69,9 @@ class InventoryServiceImplTest {
 
         assertEquals(7, inventory.getAvailableQuantity());
         assertEquals(5, inventory.getReservedQuantity());
-        verify(providerInventoryReservedEvent).publish(argThat(
-                event -> "order-10".equals(event.getOrderId()) && "Inventory Reserved".equals(event.getStatus())));
+        verify(providerInventoryReservedEvent).publish(argThat(event -> "order-10".equals(event.getOrderId())
+                && "Inventory Reserved".equals(event.getStatus())
+                && "".equals(event.getReason())));
     }
 
     @Test

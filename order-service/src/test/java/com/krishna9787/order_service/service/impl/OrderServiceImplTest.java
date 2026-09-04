@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
-import com.krishna9787.order_service.dto.InventoryReservedDto;
+import com.krishna9787.order_service.dto.InventoryStatusDto;
 import com.krishna9787.order_service.dto.OrdersDto;
 import com.krishna9787.order_service.entity.Orders;
 import com.krishna9787.order_service.repository.OrderRepository;
@@ -112,7 +112,7 @@ public class OrderServiceImplTest {
 
     @Test
     void shouldUpdateEventTypeWhenInventoryReserved() {
-        InventoryReservedDto inventoryReservedDto = new InventoryReservedDto("ORD-3003", "RESERVED");
+        InventoryStatusDto inventoryReservedDto = new InventoryStatusDto("ORD-3003", "RESERVED", "Inventory available");
         Orders order = new Orders();
         order.setOrderId("ORD-3003");
         order.setEventType("PENDING");
@@ -120,7 +120,7 @@ public class OrderServiceImplTest {
         when(orderRepository.findByOrderId("ORD-3003")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Orders.class))).thenReturn(order);
 
-        orderService.handleReservedINventory(inventoryReservedDto);
+        orderService.handleInventoryStatus(inventoryReservedDto);
 
         assertEquals("RESERVED", order.getEventType());
         verify(orderRepository).save(order);
@@ -131,7 +131,8 @@ public class OrderServiceImplTest {
         when(orderRepository.findByOrderId("ORD-404")).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> orderService.handleReservedINventory(new InventoryReservedDto("ORD-404", "RESERVED")));
+                () -> orderService.handleInventoryStatus(
+                        new InventoryStatusDto("ORD-404", "RESERVED", "Inventory not available")));
 
         assertEquals("order not found", exception.getMessage());
     }

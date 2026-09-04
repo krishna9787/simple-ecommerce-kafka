@@ -8,14 +8,14 @@ import com.krishna9787.order_service.dto.InventoryStatusDto;
 import com.krishna9787.order_service.service.OrderService;
 
 @Component
-public class ProcessInventoryReserved {
+public class ConsumerInventoryFailedEvent {
 
     @Autowired
     private OrderService orderservice;
 
-    @KafkaListener(topics = "${inventory-service.consumers.consumer1.topic}", groupId = "${inventory-service.consumers.consumer1.group-id}")
-    public void processInventoryReserved(InventoryStatusDto inventoryReservedDto) {
-        System.out.println("Inventory reserved: " + inventoryReservedDto.getStatus());
+    @KafkaListener(topics = "${inventory-service.consumers.consumer2.topic}", groupId = "${inventory-service.consumers.consumer2.group-id}")
+    public void processInventoryFailed(InventoryStatusDto inventoryReservedDto) {
+        System.out.println("Inventory failed event received.");
         orderservice.handleInventoryStatus(inventoryReservedDto);
     }
 }

@@ -5,8 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.krishna9787.inventory_service.dto.InventoryDto;
-import com.krishna9787.inventory_service.dto.InventoryFailedEventDto;
-import com.krishna9787.inventory_service.dto.InventoryReservedEventDto;
+import com.krishna9787.inventory_service.dto.InventoryStatusEventDto;
 import com.krishna9787.inventory_service.dto.OrderCreatedEventDto;
 import com.krishna9787.inventory_service.entity.Inventory;
 import com.krishna9787.inventory_service.exception.InventoryNotFoundException;
@@ -50,18 +49,19 @@ public class InventoryServiceImpl implements InventoryService {
 
         inventory.setReservedQuantity(inventory.getReservedQuantity() + event.getQuantity());
 
-        providerInventoryReservedEvent.publish(new InventoryReservedEventDto(event.getOrderId(), "Inventory Reserved"));
+        providerInventoryReservedEvent
+                .publish(new InventoryStatusEventDto(event.getOrderId(), "Inventory Reserved", ""));
     }
 
     public void handleProductNotFound(OrderCreatedEventDto event) {
         provideInventoryFailedEvent
-                .publish(new InventoryFailedEventDto(event.getOrderId(), "Failed", "Product not Found"));
+                .publish(new InventoryStatusEventDto(event.getOrderId(), "Failed", "Product not Found"));
         throw new InventoryNotFoundException("Inventory Not Found Exception");
     }
 
     public void handleNotEnoughQuantity(OrderCreatedEventDto event) {
         provideInventoryFailedEvent
-                .publish(new InventoryFailedEventDto(event.getOrderId(), "Failed", "Not Enough Quantity"));
+                .publish(new InventoryStatusEventDto(event.getOrderId(), "Failed", "Not Enough Quantity"));
         throw new NotEnoughQuantityException("Not Enough quantity to fulfill the order");
     }
 

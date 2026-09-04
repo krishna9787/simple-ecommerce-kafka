@@ -13,21 +13,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
-import com.krishna9787.inventory_service.dto.InventoryFailedEventDto;
+import com.krishna9787.inventory_service.dto.InventoryStatusEventDto;
 
 @ExtendWith(MockitoExtension.class)
 class ProvideInventoryFailedEventTest {
 
     @Mock
-    private KafkaTemplate<String, InventoryFailedEventDto> kafkaTemplate;
+    private KafkaTemplate<String, InventoryStatusEventDto> kafkaTemplate;
 
     @InjectMocks
     private ProvideInventoryFailedEvent provideInventoryFailedEvent;
 
     @Test
     void publish_shouldSendEventToInventoryFailedTopic() {
-        InventoryFailedEventDto event = new InventoryFailedEventDto("order-101", "Failed", "Product not Found");
-        CompletableFuture<SendResult<String, InventoryFailedEventDto>> future = CompletableFuture.completedFuture(null);
+        InventoryStatusEventDto event = new InventoryStatusEventDto("order-101", "Failed", "Product not Found");
+        CompletableFuture<SendResult<String, InventoryStatusEventDto>> future = CompletableFuture.completedFuture(null);
 
         when(kafkaTemplate.send(ProvideInventoryFailedEvent.topic, event.getOrderId(), event)).thenReturn(future);
 

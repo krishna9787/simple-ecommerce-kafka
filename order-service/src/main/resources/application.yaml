@@ -25,14 +25,25 @@ spring:
       properties:
         spring.json.add.type.headers: true
     consumer:
-      group-id: inventory-reserved-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         properties:
         spring.json.trusted.packages: "com.krishna9787.inventory_service.dto"
-        spring.json.type.mapping: "com.krishna9787.inventory_service.dto.InventoryReservedEventDto:com.krishna9787.order_service.dto.InventoryReservedDto"
+        spring.json.type.mapping: "com.krishna9787.inventory_service.dto.InventoryStatusEventDto:com.krishna9787.order_service.dto.InventoryStatusDto"
+
+    listener:
+      concurrency: 1
+
+inventory-service:
+  consumers:
+    consumer1:
+      group-id: inventory-reserved-group
+      topic: inventory-reserved
+    consumer2:
+      group-id: inventory-failed-group
+      topic: inventory-failed
 
 server:
   port: 8081

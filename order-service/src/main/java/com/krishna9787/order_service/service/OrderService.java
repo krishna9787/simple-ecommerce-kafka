@@ -1,6 +1,6 @@
 package com.krishna9787.order_service.service;
 
-import com.krishna9787.order_service.dto.InventoryReservedDto;
+import com.krishna9787.order_service.dto.InventoryStatusDto;
 import com.krishna9787.order_service.dto.OrdersDto;
 
 public interface OrderService {
@@ -9,5 +9,5 @@ public interface OrderService {
 
     OrdersDto findOrderById(String value);
 
-    void handleReservedINventory(InventoryReservedDto inventoryReservedDto);
+    void handleInventoryStatus(InventoryStatusDto inventoryReservedDto);
 }

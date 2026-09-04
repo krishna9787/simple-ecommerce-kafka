@@ -13,21 +13,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
-import com.krishna9787.inventory_service.dto.InventoryReservedEventDto;
+import com.krishna9787.inventory_service.dto.InventoryStatusEventDto;
 
 @ExtendWith(MockitoExtension.class)
 class ProviderInventoryReservedEventTest {
 
     @Mock
-    private KafkaTemplate<String, InventoryReservedEventDto> kafkaTemplate;
+    private KafkaTemplate<String, InventoryStatusEventDto> kafkaTemplate;
 
     @InjectMocks
     private ProviderInventoryReservedEvent providerInventoryReservedEvent;
 
     @Test
     void publish_shouldSendEventToInventoryReservedTopic() {
-        InventoryReservedEventDto event = new InventoryReservedEventDto("order-202", "Inventory Reserved");
-        CompletableFuture<SendResult<String, InventoryReservedEventDto>> future = CompletableFuture
+        InventoryStatusEventDto event = new InventoryStatusEventDto("order-202", "Inventory Reserved", "");
+        CompletableFuture<SendResult<String, InventoryStatusEventDto>> future = CompletableFuture
                 .completedFuture(null);
 
         when(kafkaTemplate.send("inventory-reserved", event.getOrderId(), event)).thenReturn(future);

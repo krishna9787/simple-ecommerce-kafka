@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryFailedEventDto {
+public class InventoryStatusEventDto {
+
     private String orderId;
     private String status;
     private String reason;
